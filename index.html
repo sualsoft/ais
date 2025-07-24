@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Slide to Launch</title>
+    <!-- Tailwind CSS CDN for easy styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* Custom styles for the slider */
+      body {
+        font-family: "Inter", sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        overflow: hidden; /* Prevent body scroll if content overflows */
+
+        /* Animated Gradient Background */
+        background-image: url(https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExMG0zZDZiOHZ6bXhzcWc1OXA1NWl6cXM4djQ2djRyZXN1ZmoxYTZ6byZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/lnfzT3k8g7wpG/giphy.gif);
+
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+      }
+
+      .slider-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 90%; /* Responsive width */
+        max-width: 800px; /* Max width for desktop */
+        min-height: 600px;
+        background-color: #ffffff76;
+        backdrop-filter: blur(10px); /* Frosted glass effect */
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15); /* Deeper shadow */
+        border-radius: 1.5rem; /* More rounded corners */
+        padding: 2rem; /* Increased padding */
+        text-align: center;
+        transition: transform 0.3s ease-in-out; /* Smooth transition for container */
+      }
+
+      .slider-container.launching {
+        transform: scale(0.95); /* Slightly shrink on launch */
+      }
+
+      .slider-track {
+        position: relative;
+        width: 100%;
+        height: 3.5rem; /* Taller track */
+        background-color: #e0e0e0; /* Light gray track */
+        border-radius: 1.75rem; /* Fully rounded track */
+        overflow: hidden; /* Hide overflow of the filled part */
+        cursor: grab; /* Indicate draggable */
+        user-select: none; /* Prevent text selection during drag */
+        touch-action: pan-y; /* Allow vertical scrolling, prevent horizontal */
+      }
+
+      .slider-fill {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 0; /* Starts at 0 width */
+        background: linear-gradient(
+          90deg,
+          #60a5fa,
+          #3b82f6
+        ); /* Blue gradient fill */
+        border-radius: 1.75rem;
+        transition: width 0.1s ease-out; /* Smooth transition for fill width */
+      }
+
+      .slider-thumb {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 3.5rem; /* Square thumb */
+        height: 3.5rem;
+        background-color: #2563eb; /* Darker blue for thumb */
+        border-radius: 50%; /* Circular thumb */
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Thumb shadow */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-size: 1.5rem; /* Icon size */
+        cursor: grab;
+        transition: transform 0.1s ease-out, box-shadow 0.2s ease-in-out; /* Smooth transition for thumb movement and shadow */
+        z-index: 10; /* Ensure thumb is above fill */
+      }
+
+      .slider-thumb.dragging {
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); /* Larger shadow when dragging */
+      }
+
+      .slider-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #6b7280; /* Gray text */
+        font-weight: 600;
+        font-size: 1.125rem; /* Larger font size */
+        pointer-events: none; /* Allow clicks to pass through to the track */
+        z-index: 5; /* Below thumb */
+        transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+      }
+
+      .slider-track.sliding .slider-text {
+        opacity: 0; /* Hide text when sliding */
+        transform: translate(-50%, -50%) translateY(-10px); /* Slight upward movement */
+      }
+
+      /* New style for launching text */
+      .launching-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #3b82f6; /* Blue text */
+        font-weight: 700;
+        font-size: 1.25rem; /* Even larger font */
+        opacity: 0; /* Initially hidden */
+        transition: opacity 0.3s ease-in-out;
+        z-index: 15; /* Above everything else */
+      }
+
+      .slider-container.launching .launching-text {
+        opacity: 1; /* Show when launching */
+      }
+    </style>
+  </head>
+  <body>
+    <div id="sliderContainer" class="slider-container">
+      <h1 class="text-2xl font-bold text-gray-800 mb-6">Welcome!</h1>
+      <p class="text-gray-600 mb-8">
+        Slide the button to launch our official website.
+      </p>
+
+      <div id="sliderTrack" class="slider-track">
+        <div id="sliderFill" class="slider-fill"></div>
+        <div id="sliderThumb" class="slider-thumb">
+          <!-- Simple arrow icon using SVG for better scalability -->
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            class="w-8 h-8"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M16.72 7.72a.75.75 0 0 1 1.06 0l3.75 3.75a.75.75 0 0 1 0 1.06l-3.75 3.75a.75.75 0 1 1-1.06-1.06l2.47-2.47H3a.75.75 0 0 1 0-1.5h16.19l-2.47-2.47a.75.75 0 0 1 0-1.06Z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        </div>
+        <div id="sliderText" class="slider-text">Slide to Launch</div>
+        <div id="launchingText" class="launching-text">Launching...</div>
+      </div>
+    </div>
+
+    <script>
+      const sliderContainer = document.getElementById("sliderContainer");
+      const sliderTrack = document.getElementById("sliderTrack");
+      const sliderThumb = document.getElementById("sliderThumb");
+      const sliderFill = document.getElementById("sliderFill");
+      const sliderText = document.getElementById("sliderText");
+      const launchingText = document.getElementById("launchingText");
+
+      // The URL to redirect to (updated from previous version)
+      const launchUrl =
+        "https://fcms.kln.ac.lk/dep/doa/index.php/component/sppagebuilder/?view=page&id=252";
+
+      let isDragging = false;
+      let startX;
+      let thumbOffset = 0; // Current offset of the thumb from the left edge of the track
+
+      // Function to update the thumb and fill position
+      function updateSliderPosition(newOffset) {
+        const trackWidth = sliderTrack.offsetWidth;
+        const thumbWidth = sliderThumb.offsetWidth;
+        const maxOffset = trackWidth - thumbWidth;
+
+        // Ensure the thumb stays within the track boundaries
+        thumbOffset = Math.max(0, Math.min(newOffset, maxOffset));
+
+        sliderThumb.style.transform = `translateX(${thumbOffset}px)`;
+        // The fill width should match the thumb's left edge
+        sliderFill.style.width = `${thumbOffset + thumbWidth / 2}px`; // Adjust fill to go slightly past center of thumb
+      }
+
+      // Handle mouse down event
+      sliderThumb.addEventListener("mousedown", (e) => {
+        isDragging = true;
+        startX = e.clientX - thumbOffset; // Calculate initial offset relative to mouse click
+        sliderTrack.classList.add("sliding"); // Add class to hide text
+        sliderThumb.classList.add("dragging"); // Add class for dragging animation
+        sliderThumb.style.cursor = "grabbing";
+      });
+
+      // Handle touch start event
+      sliderThumb.addEventListener(
+        "touchstart",
+        (e) => {
+          isDragging = true;
+          startX = e.touches[0].clientX - thumbOffset; // Calculate initial offset relative to touch point
+          sliderTrack.classList.add("sliding"); // Add class to hide text
+          sliderThumb.classList.add("dragging"); // Add class for dragging animation
+          sliderThumb.style.cursor = "grabbing";
+          e.preventDefault(); // Prevent default touch behavior like scrolling
+        },
+        { passive: false }
+      ); // Use passive: false to allow preventDefault
+
+      // Handle mouse move event
+      document.addEventListener("mousemove", (e) => {
+        if (!isDragging) return;
+        const newOffset = e.clientX - startX;
+        updateSliderPosition(newOffset);
+      });
+
+      // Handle touch move event
+      document.addEventListener(
+        "touchmove",
+        (e) => {
+          if (!isDragging) return;
+          const newOffset = e.touches[0].clientX - startX;
+          updateSliderPosition(newOffset);
+          e.preventDefault(); // Prevent default touch behavior like scrolling
+        },
+        { passive: false }
+      );
+
+      // Handle mouse up event
+      document.addEventListener("mouseup", () => {
+        if (!isDragging) return;
+        isDragging = false;
+        sliderTrack.classList.remove("sliding"); // Remove class to show text
+        sliderThumb.classList.remove("dragging"); // Remove dragging animation class
+        sliderThumb.style.cursor = "grab";
+
+        const trackWidth = sliderTrack.offsetWidth;
+        const thumbWidth = sliderThumb.offsetWidth;
+        const launchThreshold = trackWidth - thumbWidth - 10; // 10px tolerance from the end
+
+        // Check if the thumb is close enough to the end
+        if (thumbOffset >= launchThreshold) {
+          // Trigger launching animation
+          sliderContainer.classList.add("launching");
+          sliderText.style.opacity = "0"; // Ensure original text is fully hidden
+          launchingText.style.opacity = "1"; // Show launching text
+
+          // Delay redirection to allow animation to play
+          setTimeout(() => {
+            window.location.href = launchUrl; // Redirect to the website
+          }, 800); // 800ms delay for animation
+        } else {
+          // If not slid far enough, reset the thumb position
+          updateSliderPosition(0);
+          sliderText.style.opacity = "1"; // Ensure original text is visible
+        }
+      });
+
+      // Handle touch end event
+      document.addEventListener("touchend", () => {
+        if (!isDragging) return;
+        isDragging = false;
+        sliderTrack.classList.remove("sliding"); // Remove class to show text
+        sliderThumb.classList.remove("dragging"); // Remove dragging animation class
+        sliderThumb.style.cursor = "grab";
+
+        const trackWidth = sliderTrack.offsetWidth;
+        const thumbWidth = sliderThumb.offsetWidth;
+        const launchThreshold = trackWidth - thumbWidth - 10; // 10px tolerance from the end
+
+        // Check if the thumb is close enough to the end
+        if (thumbOffset >= launchThreshold) {
+          // Trigger launching animation
+          sliderContainer.classList.add("launching");
+          sliderText.style.opacity = "0"; // Ensure original text is fully hidden
+          launchingText.style.opacity = "1"; // Show launching text
+
+          // Delay redirection to allow animation to play
+          setTimeout(() => {
+            window.location.href = launchUrl; // Redirect to the website
+          }, 800); // 800ms delay for animation
+        } else {
+          // If not slid far enough, reset the thumb position
+          updateSliderPosition(0);
+          sliderText.style.opacity = "1"; // Ensure original text is visible
+        }
+      });
+
+      // Handle window resize to adjust slider position if necessary
+      window.addEventListener("resize", () => {
+        // Recalculate and reset position on resize to prevent out-of-bounds issues
+        updateSliderPosition(0);
+        sliderContainer.classList.remove("launching"); // Remove launching class on resize
+        sliderText.style.opacity = "1"; // Ensure original text is visible
+        launchingText.style.opacity = "0"; // Hide launching text
+      });
+
+      // Initial position update on load
+      window.onload = () => {
+        updateSliderPosition(0);
+      };
+    </script>
+  </body>
+</html>

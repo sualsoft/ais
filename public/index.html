@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+	<meta name="generator" content="Hugo 0.143.1"><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Slide to Launch</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+       
+      body {
+        font-family: "Inter", sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        overflow: hidden;  
+
+         
+        background-image: url(https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExMG0zZDZiOHZ6bXhzcWc1OXA1NWl6cXM4djQ2djRyZXN1ZmoxYTZ6byZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/lnfzT3k8g7wpG/giphy.gif);
+
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+      }
+
+      .slider-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 90%;  
+        max-width: 800px;  
+        min-height: 600px;
+        background-color: #ffffff76;
+        backdrop-filter: blur(10px);  
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);  
+        border-radius: 1.5rem;  
+        padding: 2rem;  
+        text-align: center;
+        transition: transform 0.3s ease-in-out;  
+      }
+
+      .slider-container.launching {
+        transform: scale(0.95);  
+      }
+
+      .slider-track {
+        position: relative;
+        width: 100%;
+        height: 3.5rem;  
+        background-color: #e0e0e0;  
+        border-radius: 1.75rem;  
+        overflow: hidden;  
+        cursor: grab;  
+        user-select: none;  
+        touch-action: pan-y;  
+      }
+
+      .slider-fill {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 0;  
+        background: linear-gradient(
+          90deg,
+          #60a5fa,
+          #3b82f6
+        );  
+        border-radius: 1.75rem;
+        transition: width 0.1s ease-out;  
+      }
+
+      .slider-thumb {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 3.5rem;  
+        height: 3.5rem;
+        background-color: #2563eb;  
+        border-radius: 50%;  
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);  
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-size: 1.5rem;  
+        cursor: grab;
+        transition: transform 0.1s ease-out, box-shadow 0.2s ease-in-out;  
+        z-index: 10;  
+      }
+
+      .slider-thumb.dragging {
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);  
+      }
+
+      .slider-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #6b7280;  
+        font-weight: 600;
+        font-size: 1.125rem;  
+        pointer-events: none;  
+        z-index: 5;  
+        transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+      }
+
+      .slider-track.sliding .slider-text {
+        opacity: 0;  
+        transform: translate(-50%, -50%) translateY(-10px);  
+      }
+
+       
+      .launching-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #3b82f6;  
+        font-weight: 700;
+        font-size: 1.25rem;  
+        opacity: 0;  
+        transition: opacity 0.3s ease-in-out;
+        z-index: 15;  
+      }
+
+      .slider-container.launching .launching-text {
+        opacity: 1;  
+      }
+    </style>
+  </head>
+  <body>
+    <div id="sliderContainer" class="slider-container">
+      <h1 class="text-2xl font-bold text-gray-800 mb-6">Welcome!</h1>
+      <p class="text-gray-600 mb-8">
+        Slide the button to launch our official website.
+      </p>
+
+      <div id="sliderTrack" class="slider-track">
+        <div id="sliderFill" class="slider-fill"></div>
+        <div id="sliderThumb" class="slider-thumb">
+          
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            class="w-8 h-8"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M16.72 7.72a.75.75 0 0 1 1.06 0l3.75 3.75a.75.75 0 0 1 0 1.06l-3.75 3.75a.75.75 0 1 1-1.06-1.06l2.47-2.47H3a.75.75 0 0 1 0-1.5h16.19l-2.47-2.47a.75.75 0 0 1 0-1.06Z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        </div>
+        <div id="sliderText" class="slider-text">Slide to Launch</div>
+        <div id="launchingText" class="launching-text">Launching...</div>
+      </div>
+    </div>
+
+    <script>
+      const sliderContainer = document.getElementById("sliderContainer");
+      const sliderTrack = document.getElementById("sliderTrack");
+      const sliderThumb = document.getElementById("sliderThumb");
+      const sliderFill = document.getElementById("sliderFill");
+      const sliderText = document.getElementById("sliderText");
+      const launchingText = document.getElementById("launchingText");
+
+      
+      const launchUrl =
+        "https://fcms.kln.ac.lk/dep/doa/index.php/component/sppagebuilder/?view=page&id=252";
+
+      let isDragging = false;
+      let startX;
+      let thumbOffset = 0; 
+
+      
+      function updateSliderPosition(newOffset) {
+        const trackWidth = sliderTrack.offsetWidth;
+        const thumbWidth = sliderThumb.offsetWidth;
+        const maxOffset = trackWidth - thumbWidth;
+
+        
+        thumbOffset = Math.max(0, Math.min(newOffset, maxOffset));
+
+        sliderThumb.style.transform = `translateX(${thumbOffset}px)`;
+        
+        sliderFill.style.width = `${thumbOffset + thumbWidth / 2}px`; 
+      }
+
+      
+      sliderThumb.addEventListener("mousedown", (e) => {
+        isDragging = true;
+        startX = e.clientX - thumbOffset; 
+        sliderTrack.classList.add("sliding"); 
+        sliderThumb.classList.add("dragging"); 
+        sliderThumb.style.cursor = "grabbing";
+      });
+
+      
+      sliderThumb.addEventListener(
+        "touchstart",
+        (e) => {
+          isDragging = true;
+          startX = e.touches[0].clientX - thumbOffset; 
+          sliderTrack.classList.add("sliding"); 
+          sliderThumb.classList.add("dragging"); 
+          sliderThumb.style.cursor = "grabbing";
+          e.preventDefault(); 
+        },
+        { passive: false }
+      ); 
+
+      
+      document.addEventListener("mousemove", (e) => {
+        if (!isDragging) return;
+        const newOffset = e.clientX - startX;
+        updateSliderPosition(newOffset);
+      });
+
+      
+      document.addEventListener(
+        "touchmove",
+        (e) => {
+          if (!isDragging) return;
+          const newOffset = e.touches[0].clientX - startX;
+          updateSliderPosition(newOffset);
+          e.preventDefault(); 
+        },
+        { passive: false }
+      );
+
+      
+      document.addEventListener("mouseup", () => {
+        if (!isDragging) return;
+        isDragging = false;
+        sliderTrack.classList.remove("sliding"); 
+        sliderThumb.classList.remove("dragging"); 
+        sliderThumb.style.cursor = "grab";
+
+        const trackWidth = sliderTrack.offsetWidth;
+        const thumbWidth = sliderThumb.offsetWidth;
+        const launchThreshold = trackWidth - thumbWidth - 10; 
+
+        
+        if (thumbOffset >= launchThreshold) {
+          
+          sliderContainer.classList.add("launching");
+          sliderText.style.opacity = "0"; 
+          launchingText.style.opacity = "1"; 
+
+          
+          setTimeout(() => {
+            window.location.href = launchUrl; 
+          }, 800); 
+        } else {
+          
+          updateSliderPosition(0);
+          sliderText.style.opacity = "1"; 
+        }
+      });
+
+      
+      document.addEventListener("touchend", () => {
+        if (!isDragging) return;
+        isDragging = false;
+        sliderTrack.classList.remove("sliding"); 
+        sliderThumb.classList.remove("dragging"); 
+        sliderThumb.style.cursor = "grab";
+
+        const trackWidth = sliderTrack.offsetWidth;
+        const thumbWidth = sliderThumb.offsetWidth;
+        const launchThreshold = trackWidth - thumbWidth - 10; 
+
+        
+        if (thumbOffset >= launchThreshold) {
+          
+          sliderContainer.classList.add("launching");
+          sliderText.style.opacity = "0"; 
+          launchingText.style.opacity = "1"; 
+
+          
+          setTimeout(() => {
+            window.location.href = launchUrl; 
+          }, 800); 
+        } else {
+          
+          updateSliderPosition(0);
+          sliderText.style.opacity = "1"; 
+        }
+      });
+
+      
+      window.addEventListener("resize", () => {
+        
+        updateSliderPosition(0);
+        sliderContainer.classList.remove("launching"); 
+        sliderText.style.opacity = "1"; 
+        launchingText.style.opacity = "0"; 
+      });
+
+      
+      window.onload = () => {
+        updateSliderPosition(0);
+      };
+    </script>
+  </body>
+</html>
